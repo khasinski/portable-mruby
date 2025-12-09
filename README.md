@@ -38,7 +38,7 @@ A single binary runs on:
 gem install portable_mruby
 ```
 
-On first build, the Cosmopolitan toolchain (~60MB) will be automatically downloaded to `~/.portable-mruby/cosmocc/`.
+On first build, the Cosmopolitan toolchain (~400MB) will be automatically downloaded to `~/.portable-mruby/cosmocc/`.
 
 ## Usage
 
