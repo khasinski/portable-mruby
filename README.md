@@ -45,21 +45,24 @@ On first build, the Cosmopolitan toolchain (~60MB) will be automatically downloa
 ### Basic Usage
 
 ```bash
-# Build a single-file Ruby program
-portable-mruby build --entry main.rb --output myapp.com
+# Build all .rb files in current directory
+portable-mruby build -o myapp.com
+
+# Build all .rb files in a directory
+portable-mruby build -d src/ -o myapp.com
 
 # Run on any supported platform
 ./myapp.com
 ```
 
-### Multi-file Projects
+### With Entry Point
 
 ```bash
-# Build a project with multiple Ruby files
-portable-mruby build --entry main.rb --dir src/ --output myapp.com
+# Specify an entry file (runs last, after all other files)
+portable-mruby build -e main.rb -d src/ -o myapp.com
 ```
 
-All `.rb` files in the directory are compiled and included. The entry file is executed last.
+All `.rb` files are compiled and executed in sorted order. If `--entry` is specified, that file runs last.
 
 ### Options
 
@@ -67,7 +70,7 @@ All `.rb` files in the directory are compiled and included. The entry file is ex
 Usage: portable-mruby build [options]
 
 Options:
-    -e, --entry FILE        Entry point Ruby file (required)
+    -e, --entry FILE        Entry point Ruby file (runs last)
     -d, --dir DIR           Source directory (default: .)
     -o, --output FILE       Output binary name (default: app.com)
     --mruby-source DIR      Build mruby from custom source directory
@@ -149,31 +152,6 @@ puts greeter.greet
 portable-mruby build -e main.rb -d myapp/ -o greeter.com
 ./greeter.com Ruby  # => Hello, Ruby!
 ```
-
-## mruby vs CRuby
-
-mruby is a lightweight Ruby implementation. Key differences:
-
-| Feature | CRuby | mruby |
-|---------|-------|-------|
-| `require`/`require_relative` | Yes | No (all files compiled together) |
-| Gems | Yes | No |
-| Native extensions | Yes | No |
-| Regexp | Yes | Optional (not included by default) |
-| Standard library | Full | Core subset |
-
-**Available in mruby**: Classes, modules, blocks, procs, lambdas, exceptions, File I/O, Dir, Time, Math, Struct, Fiber, sockets, and more.
-
-**Not available**: `require`, gems, Regexp (by default), `sleep`, some stdlib classes.
-
-## Binary Size
-
-| Type | Size |
-|------|------|
-| Simple programs | ~2.7 MB |
-| Complex programs | ~2.7-3 MB |
-
-The base mruby runtime accounts for most of the size. Additional Ruby code adds minimal overhead since it compiles to compact bytecode.
 
 ## Build Process
 

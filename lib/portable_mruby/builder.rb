@@ -7,7 +7,7 @@ module PortableMruby
   class Builder
     attr_reader :entry_file, :source_dir, :output, :verbose, :mruby_source
 
-    def initialize(entry_file:, source_dir: ".", output: "app.com", verbose: false, mruby_source: nil)
+    def initialize(entry_file: nil, source_dir: ".", output: "app.com", verbose: false, mruby_source: nil)
       @entry_file = entry_file
       @source_dir = File.expand_path(source_dir)
       @output = output
@@ -51,12 +51,16 @@ module PortableMruby
       pattern = File.join(@source_dir, "**", "*.rb")
       files = Dir.glob(pattern).sort
 
-      entry_path = File.absolute_path?(@entry_file) ? @entry_file : File.join(@source_dir, @entry_file)
+      raise BuildError, "No Ruby files found in #{@source_dir}" if files.empty?
 
-      raise BuildError, "Entry file not found: #{entry_path}" unless File.exist?(entry_path)
+      if @entry_file
+        entry_path = File.absolute_path?(@entry_file) ? @entry_file : File.join(@source_dir, @entry_file)
+        raise BuildError, "Entry file not found: #{entry_path}" unless File.exist?(entry_path)
 
-      files.delete(entry_path)
-      files << entry_path
+        files.delete(entry_path)
+        files << entry_path
+      end
+
       files
     end
 

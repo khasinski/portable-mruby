@@ -50,7 +50,7 @@ module PortableMruby
         opts.separator ""
         opts.separator "Options:"
 
-        opts.on("-e", "--entry FILE", "Entry point Ruby file (required)") do |f|
+        opts.on("-e", "--entry FILE", "Entry point Ruby file (runs last)") do |f|
           @options[:entry] = f
         end
 
@@ -77,12 +77,6 @@ module PortableMruby
       end
 
       parser.parse!(@args)
-
-      unless @options[:entry]
-        $stderr.puts "Error: --entry is required"
-        $stderr.puts parser
-        exit 1
-      end
 
       builder = Builder.new(
         entry_file: @options[:entry],
@@ -117,7 +111,7 @@ module PortableMruby
           help      Show this help message
 
         Build Options:
-          -e, --entry FILE        Entry point Ruby file (required)
+          -e, --entry FILE        Entry point Ruby file (runs last)
           -d, --dir DIR           Source directory (default: .)
           -o, --output FILE       Output binary name (default: app.com)
           --mruby-source DIR      Build mruby from source directory
@@ -127,9 +121,12 @@ module PortableMruby
           COSMO_ROOT              Path to cosmocc toolchain (auto-downloaded if not set)
 
         Examples:
-          portable-mruby build --entry main.rb --dir src/ --output myapp.com
-          portable-mruby build -e app.rb -o app.com
+          portable-mruby build -d src/ -o myapp.com
+          portable-mruby build -e main.rb -d src/ -o myapp.com
           portable-mruby build -e main.rb --mruby-source ~/mruby
+
+        All .rb files in the directory are compiled and executed in sorted order.
+        If --entry is specified, that file runs last (after all others).
 
         The resulting binary runs on Linux, macOS, Windows, FreeBSD, OpenBSD, and NetBSD
         for both x86_64 and ARM64 architectures.

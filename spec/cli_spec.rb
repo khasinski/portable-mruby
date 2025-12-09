@@ -39,15 +39,6 @@ RSpec.describe PortableMruby::CLI do
   end
 
   describe "build command" do
-    it "requires --entry option" do
-      cli = described_class.new(["build"])
-
-      expect {
-        cli.run
-      }.to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
-        .and output(/--entry is required/).to_stderr
-    end
-
     it "shows help with -h flag" do
       cli = described_class.new(["build", "-h"])
 
