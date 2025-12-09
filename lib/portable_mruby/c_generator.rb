@@ -52,6 +52,26 @@ module PortableMruby
               }
           }
 
+          /* Call __main__ if defined (optional entry point) */
+          /* Supports both __main__(argv) and __main__() signatures */
+          if (!mrb->exc && mrb_respond_to(mrb, mrb_top_self(mrb), mrb_intern_lit(mrb, "__main__"))) {
+              mrb_value full_argv = mrb_ary_new_capa(mrb, argc);
+              for (i = 0; i < argc; i++) {
+                  mrb_ary_push(mrb, full_argv, mrb_str_new_cstr(mrb, argv[i]));
+              }
+              /* Try calling with argv first */
+              mrb_funcall(mrb, mrb_top_self(mrb), "__main__", 1, full_argv);
+              /* If ArgumentError (wrong number of args), retry without args */
+              if (mrb->exc && mrb_obj_is_kind_of(mrb, mrb_obj_value(mrb->exc), mrb_class_get(mrb, "ArgumentError"))) {
+                  mrb->exc = NULL;
+                  mrb_funcall(mrb, mrb_top_self(mrb), "__main__", 0);
+              }
+              if (mrb->exc) {
+                  mrb_print_error(mrb);
+                  return_value = 1;
+              }
+          }
+
           mrb_close(mrb);
           return return_value;
       }

@@ -67,5 +67,41 @@ RSpec.describe PortableMruby::CGenerator do
         expect(c_source).to include("bytecode_0")
       end
     end
+
+    describe "__main__ support" do
+      it "includes code to call __main__ if defined" do
+        generator = described_class.new([])
+        c_source = generator.generate
+
+        expect(c_source).to include('mrb_respond_to(mrb, mrb_top_self(mrb), mrb_intern_lit(mrb, "__main__"))')
+      end
+
+      it "supports __main__(argv) signature with full argv array" do
+        generator = described_class.new([])
+        c_source = generator.generate
+
+        # Should build full_argv including program name (argv[0])
+        expect(c_source).to include("mrb_value full_argv = mrb_ary_new_capa(mrb, argc)")
+        expect(c_source).to include("for (i = 0; i < argc; i++)")
+        expect(c_source).to include('mrb_funcall(mrb, mrb_top_self(mrb), "__main__", 1, full_argv)')
+      end
+
+      it "falls back to __main__() if ArgumentError is raised" do
+        generator = described_class.new([])
+        c_source = generator.generate
+
+        # Should catch ArgumentError and retry without args
+        expect(c_source).to include("ArgumentError")
+        expect(c_source).to include('mrb_funcall(mrb, mrb_top_self(mrb), "__main__", 0)')
+      end
+
+      it "only calls __main__ if no prior exception occurred" do
+        generator = described_class.new([])
+        c_source = generator.generate
+
+        # Should check !mrb->exc before calling __main__
+        expect(c_source).to include("if (!mrb->exc && mrb_respond_to")
+      end
+    end
   end
 end
