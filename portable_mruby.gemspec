@@ -23,8 +23,7 @@ Gem::Specification.new do |spec|
   spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
 
   spec.files = Dir.chdir(__dir__) do
-    # Include lib, exe, and vendor directories
-    files = Dir["{lib,exe,vendor}/**/*", "LICENSE", "README.md"]
+    files = Dir["{lib,exe}/**/*", "vendor/**/*", "vendor/**/.*/**/*", "LICENSE", "README.md"]
     files.reject { |f| File.directory?(f) }
   end
 
