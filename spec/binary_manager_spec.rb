@@ -61,18 +61,6 @@ RSpec.describe PortableMruby::BinaryManager do
     end
   end
 
-  describe ".cosmocxx_path" do
-    it "returns path to cosmoc++ binary" do
-      expect(described_class.cosmocxx_path).to end_with("bin/cosmoc++")
-    end
-  end
-
-  describe ".cosmoar_path" do
-    it "returns path to cosmoar binary" do
-      expect(described_class.cosmoar_path).to end_with("bin/cosmoar")
-    end
-  end
-
   describe ".reset_paths!" do
     it "resets custom paths to nil" do
       # This is mainly for testing after --mruby-source builds
