@@ -38,7 +38,7 @@ A single binary runs on:
 gem install portable_mruby
 ```
 
-On first build, the Cosmopolitan toolchain (~400MB) will be automatically downloaded to `~/.portable-mruby/cosmocc/`.
+On first build, the Cosmopolitan toolchain (~60MB) will be automatically downloaded to `~/.portable-mruby/cosmocc/`.
 
 ## Usage
 
@@ -174,7 +174,7 @@ gem install portable_mruby
 
 ### Build fails with cosmocc errors
 
-Ensure you have enough disk space (~300MB for cosmocc). You can also manually install cosmocc:
+Ensure you have enough disk space (~60MB for cosmocc download, ~200MB extracted). You can also manually install cosmocc:
 
 ```bash
 mkdir -p ~/.portable-mruby/cosmocc
