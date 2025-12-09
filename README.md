@@ -9,10 +9,11 @@ Build truly portable Ruby executables that run on Linux, macOS, Windows, FreeBSD
 gem install portable_mruby
 
 # Create a Ruby program
-echo 'puts "Hello from #{RUBY_ENGINE}!"' > hello.rb
+mkdir myapp
+echo 'puts "Hello from #{RUBY_ENGINE}!"' > myapp/hello.rb
 
 # Build portable executable
-portable-mruby build -e hello.rb -o hello.com
+portable-mruby build -d myapp -o hello.com
 
 # Run it (works on Linux, macOS, Windows, FreeBSD, OpenBSD, NetBSD)
 ./hello.com
@@ -45,9 +46,6 @@ On first build, the Cosmopolitan toolchain (~60MB) will be automatically downloa
 ### Basic Usage
 
 ```bash
-# Build all .rb files in current directory
-portable-mruby build -o myapp.com
-
 # Build all .rb files in a directory
 portable-mruby build -d src/ -o myapp.com
 
@@ -55,14 +53,18 @@ portable-mruby build -d src/ -o myapp.com
 ./myapp.com
 ```
 
+All `.rb` files in the directory (recursively) are compiled and executed in sorted order.
+
 ### With Entry Point
+
+When you have multiple files and need a specific file to run last (e.g., your main program that uses classes defined in other files):
 
 ```bash
 # Specify an entry file (runs last, after all other files)
-portable-mruby build -e main.rb -d src/ -o myapp.com
+portable-mruby build -d src/ -e main.rb -o myapp.com
 ```
 
-All `.rb` files are compiled and executed in sorted order. If `--entry` is specified, that file runs last.
+**Important:** The `-e` (entry) path is relative to the `-d` (directory) path. In the example above, it looks for `src/main.rb`.
 
 ### Options
 
@@ -70,8 +72,8 @@ All `.rb` files are compiled and executed in sorted order. If `--entry` is speci
 Usage: portable-mruby build [options]
 
 Options:
-    -e, --entry FILE        Entry point Ruby file (runs last)
-    -d, --dir DIR           Source directory (default: .)
+    -d, --dir DIR           Source directory containing .rb files (required)
+    -e, --entry FILE        Entry point Ruby file, relative to -d (runs last)
     -o, --output FILE       Output binary name (default: app.com)
     --mruby-source DIR      Build mruby from custom source directory
     -v, --verbose           Verbose output
@@ -90,25 +92,27 @@ If you need custom mruby gems or configuration, you can build from source:
 git clone https://github.com/mruby/mruby.git ~/mruby
 
 # Build using your custom mruby
-portable-mruby build -e main.rb --mruby-source ~/mruby -o myapp.com
+portable-mruby build -d src/ --mruby-source ~/mruby -o myapp.com
 ```
 
 ## Example
 
 Create a simple Ruby program:
 
-```ruby
-# main.rb
+```bash
+mkdir hello
+cat > hello/main.rb << 'EOF'
 name = ARGV[0] || 'World'
 puts "Hello, #{name}!"
 puts "Running on: #{RUBY_ENGINE} #{RUBY_VERSION}"
 puts "Time: #{Time.now}"
+EOF
 ```
 
 Build it:
 
 ```bash
-portable-mruby build --entry main.rb --output hello.com
+portable-mruby build -d hello -o hello.com
 ```
 
 Run it anywhere:
@@ -130,7 +134,7 @@ myapp/
 ```
 
 ```ruby
-# lib/greeter.rb
+# myapp/lib/greeter.rb
 class Greeter
   def initialize(name)
     @name = name
@@ -143,15 +147,18 @@ end
 ```
 
 ```ruby
-# main.rb
+# myapp/main.rb
 greeter = Greeter.new(ARGV[0] || 'World')
 puts greeter.greet
 ```
 
 ```bash
-portable-mruby build -e main.rb -d myapp/ -o greeter.com
+# Build with main.rb as entry point (runs last, after lib/greeter.rb)
+portable-mruby build -d myapp -e main.rb -o greeter.com
 ./greeter.com Ruby  # => Hello, Ruby!
 ```
+
+Files are loaded in sorted order (`lib/greeter.rb` before `main.rb`), but `-e main.rb` ensures it runs last regardless of sort order.
 
 ## Build Process
 
@@ -187,7 +194,7 @@ unzip cosmocc.zip
 
 ```bash
 export COSMO_ROOT=/path/to/cosmocc
-portable-mruby build -e main.rb -o app.com
+portable-mruby build -d src/ -o app.com
 ```
 
 ## License
